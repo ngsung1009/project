@@ -1,0 +1,800 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Sample">
+
+	<typeAlias  alias="egovMap" type="egovframework.rte.psl.dataaccess.util.EgovMap"/>
+	<typeAlias  alias="searchVO" type="taehee.saSystem.main.service.SaSystemDefaultVO"/>
+
+	<resultMap id="saSystem" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="pw" column="pw"/>
+		<result property="auth" column="auth"/>
+		<result property="useYn" column="use_yn"/>
+		<result property="delYn" column="del_yn"/>
+	</resultMap>
+	<select id="saSystemDAO.selectPacketList" parameterClass="searchVO" resultClass="egovMap">
+
+			SELECT
+				NUM, START_TIME,END_TIME,  EQUIP_TYPE, EQUIP_NUM,IP_ADDR, STATUS
+			FROM PACKET_LIST
+			WHERE 1=1
+			<isNotEmpty property="startTime" prepend="and">
+				START_TIME <![CDATA[ >= ]]> #startTime#
+			</isNotEmpty>
+			<isNotEmpty property="endTime" prepend="and">
+				END_TIME <![CDATA[ =< ]]> #endTime#
+			</isNotEmpty>
+			<isNotEmpty property="searchKeyword" prepend="and">
+				EQUIP_TYPE LIKE '%' || #searchKeyword# || '%' or EQUIP_NUM '%' || #searchKeyword# || '%'
+			</isNotEmpty>
+			<!--  isEqual prepend="AND" property="searchCondition" compareValue="0">
+				ID LIKE '%' || #searchKeyword# || '%'
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="1">
+				NAME LIKE '%' || #searchKeyword# || '%'
+			</isEqual-->
+			ORDER BY START_TIME DESC	
+
+	</select>
+	
+	<select id="saSystemDAO.selectEthernetSwitchList" parameterClass="searchVO" resultClass="egovMap">
+
+			SELECT
+				NUM, START_DATE,END_DATE,  SWITCH_TYPE, PORT,CONNECT_EQUIP, STATUS, REG_DT,USE_YN
+			FROM SWITCH_LIST
+			WHERE 1=1
+			<!-- isNotEmpty property="startTime" prepend="and">
+				START_TIME <![CDATA[ >= ]]> #startTime#
+			</isNotEmpty>
+			<isNotEmpty property="endTime" prepend="and">
+				END_TIME <![CDATA[ =< ]]> #endTime#
+			</isNotEmpty-->
+			<isNotEmpty property="searchKeyword" prepend="and">
+				SWITCH_TYPE LIKE '%' || #searchKeyword# || '%' or CONNECT_EQUIP '%' || #searchKeyword# || '%'
+			</isNotEmpty>
+			<!--  isEqual prepend="AND" property="searchCondition" compareValue="0">
+				ID LIKE '%' || #searchKeyword# || '%'
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="1">
+				NAME LIKE '%' || #searchKeyword# || '%'
+			</isEqual-->
+			ORDER BY START_DATE DESC	
+
+	</select>
+	<select id="saSystemDAO.selectEthernetSwitchHisList" parameterClass="searchVO" resultClass="egovMap">
+
+			SELECT
+				NUM, EVENT_DATE,  SWITCH_TYPE, PORT,CONNECT_EQUIP, STATUS
+			FROM SWITCH_STATUS
+			WHERE 1=1
+			<isNotEmpty property="startTime" prepend="and">
+				EVENT_DATE BETWEEN date_format(#startTime#,"%Y-%m-%d 00:00:01") and date_format(#endTime#, "%Y-%m-%d 23:59:59") 
+			</isNotEmpty>
+			<!-- isNotEmpty property="endTime" prepend="and">
+				END_TIME <![CDATA[ =< ]]> #endTime#
+			</isNotEmpty-->
+			<isNotEmpty property="searchKeyword" prepend="and">
+				(SWITCH_TYPE LIKE '%' || #searchKeyword# || '%' or CONNECT_EQUIP LIKE '%' || #searchKeyword# || '%')
+			</isNotEmpty>
+			<!--  isEqual prepend="AND" property="searchCondition" compareValue="0">
+				ID LIKE '%' || #searchKeyword# || '%'
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="1">
+				NAME LIKE '%' || #searchKeyword# || '%'
+			</isEqual-->
+			ORDER BY EVENT_DATE DESC	
+
+	</select>
+	<select id="saSystemDAO.selectMmsHisList" parameterClass="searchVO" resultClass="egovMap">
+
+			SELECT
+				NUM, EVENT_DATE,  IED_NUM, IED_CONN_STATUS,SA_STATUS, MAIN_EQUIP_STATUS,SUB_EQUIP_STATUS,REPORT_STATUS
+			FROM MMS_STATUS
+			WHERE 1=1
+			<isNotEmpty property="startTime" prepend="and">
+				EVENT_DATE BETWEEN date_format(#startTime#,"%Y-%m-%d 00:00:01") and date_format(#endTime#, "%Y-%m-%d 23:59:59") 
+			</isNotEmpty>
+			<isNotEmpty property="searchKeyword" prepend="and">
+				IED_NUM LIKE '%' || #searchKeyword# || '%'
+			</isNotEmpty>
+			ORDER BY EVENT_DATE DESC	
+
+	</select>
+	<select id="saSystemDAO.selectGooseHisList" parameterClass="searchVO" resultClass="egovMap">
+
+			SELECT
+				NUM, EVENT_DATE,  ADDRESS, GOOSE_TIME,STATUS_NUM, IED_NUM,MAC_ADDRESS,FAULT_CNT,STATUS
+			FROM GOOSE_STATUS
+			WHERE 1=1
+			<isNotEmpty property="startTime" prepend="and">
+				EVENT_DATE BETWEEN date_format(#startTime#,"%Y-%m-%d 00:00:01") and date_format(#endTime#, "%Y-%m-%d 23:59:59") 
+			</isNotEmpty>
+			<isNotEmpty property="searchKeyword" prepend="and">
+				IED_NUM LIKE '%' || #searchKeyword# || '%'
+			</isNotEmpty>
+			ORDER BY EVENT_DATE DESC	
+
+	</select>
+	<select id="saSystemDAO.selectIetList" parameterClass="searchVO" resultClass="egovMap">
+
+			SELECT
+				NUM, IED_NAME,  IED_IP, REG_DT,IET_FILE, SCL_FILE, FILE_PATH, PORT
+			FROM IED_LIST
+			WHERE 1=1
+			ORDER BY REG_DT DESC	
+
+	</select>
+	<insert id="saSystemDAO.insertSa">
+		<![CDATA[
+			INSERT INTO SA_LIST 
+				( SA_NAME
+				  , SA_IP
+				  , PORT)
+			VALUES ( #saName#
+				  , #saIp#
+				  , #saPort# )
+		]]>
+	</insert>
+	<insert id="saSystemDAO.insertIed">
+		<![CDATA[
+			INSERT INTO IED_LIST 
+				( IED_NAME
+				  , IED_IP
+				  , SCL_FILE
+				  , IET_FILE
+				  , FILE_PATH
+				  , PORT)
+			VALUES ( #iedName#
+				  , #iedIp#
+				  , #sclFileName#
+				  , #ietFileName#
+				  , #filePath#
+				  , #iPort# )
+		]]>
+	</insert>
+	<resultMap id="iedMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="iedName" column="ied_name"/>
+		<result property="iedIp" column="ied_ip"/>
+		<result property="regDt" column="reg_dt"/>
+		<result property="sclFileName" column="scl_file"/>
+		<result property="ietFileName" column="iet_file"/>
+		<result property="filePath" column="file_path"/>
+		<result property="iPort" column="port"/>
+	</resultMap>
+	<select id="saSystemDAO.selectIed" resultMap="iedMap">
+        <![CDATA[
+            SELECT
+                NUM, IED_NAME, IED_IP, REG_DT, SCL_FILE, IET_FILE, FILE_PATH, PORT
+            FROM IED_LIST 
+            WHERE IED_NAME=#iedName#
+        ]]>
+    </select>
+    <update id="saSystemDAO.updateIed">
+		<![CDATA[
+			UPDATE IED_LIST
+			SET  IED_IP=#iedIp#
+				, FNL_DT = CURRENT_TIMESTAMP
+				, SCL_FILE=#sclFileName#
+				, IET_FILE=#ietFileName#
+				, FILE_PATH=#filePath#
+				, PORT=#iPort#
+			WHERE IED_NAME=#iedName#
+		]]>
+	</update>
+	<insert id="saSystemDAO.insertESwitch">
+		<![CDATA[
+			INSERT INTO SWITCH_LIST 
+				( SWITCH_NAME
+				  , PORT
+				  , SWITCH_IP
+				  )
+			VALUES ( #switchName#
+				  , #iPort#
+				  , #switchIp# )
+		]]>
+	</insert>
+	<insert id="saSystemDAO.insertSntp">
+		<![CDATA[
+			INSERT INTO SNTP_LIST 
+				( SNTP_NAME
+				  , PORT
+				  , SNTP_IP
+				  )
+			VALUES ( #sntpName#
+				  , #iPort#
+				  , #sntpIp# )
+		]]>
+	</insert>
+	<insert id="saSystemDAO.insertPort">
+		<![CDATA[
+			INSERT INTO EQUIP_CONNECT_LIST 
+				( SNTP_NUM,SNTP_PORT,SA_NUM,SA_PORT,IED_NUM,SWITCH_NUM,IP_ADDRESS
+				  )
+			VALUES ( #sntpNum#
+				  , #sntpPort#
+				  , #saNum#
+				  , #saPort#
+				  , #iedNum#
+				  , #switchNum#
+				  , #ipAddress# )
+		]]>
+	</insert>
+	<select id="saSystemDAO.selectEquipList" parameterClass="searchVO" resultClass="egovMap">
+			SELECT A.* FROM (
+			SELECT
+				'IED' as EQUIP_TYPE, NUM, IED_NAME AS NAME,  IED_IP AS IP, IET_FILE AS IET_FILE_NAME, SCL_FILE AS SCL_FILE_NAME, PORT,USE_YN
+			FROM taehee.IED_LIST
+			WHERE 1=1
+			
+			UNION
+			
+			SELECT
+				'SA' as EQUIP_TYPE, NUM, SA_NAME AS NAME,  SA_IP AS IP, '' AS IET_FILE_NAME, '' AS SCL_FILE_NAME, PORT,USE_YN
+			FROM taehee.SA_LIST
+			WHERE 1=1
+			
+			
+			UNION
+			
+			SELECT
+				'ES' as EQUIP_TYPE, NUM, SWITCH_NAME AS NAME,  SWITCH_IP AS IP, '' AS IET_FILE_NAME, '' AS SCL_FILE_NAME, PORT,USE_YN
+			FROM taehee.SWITCH_LIST
+			WHERE 1=1
+			
+			UNION
+			
+			SELECT
+				'SNTP' as EQUIP_TYPE, NUM, SNTP_NAME AS NAME,  SNTP_IP AS IP, '' AS IET_FILE_NAME, '' AS SCL_FILE_NAME, PORT,USE_YN
+			FROM taehee.SNTP_LIST
+			WHERE 1=1
+			) A WHERE 1=1 ORDER BY A.EQUIP_TYPE DESC
+
+	</select>
+	<delete id="saSystemDAO.delIed">
+		<![CDATA[
+			DELETE FROM IED_LIST 
+			WHERE NUM=#num#
+		]]>
+	</delete>
+	<delete id="saSystemDAO.delSa">
+		<![CDATA[
+			DELETE FROM SA_LIST 
+			WHERE NUM=#num#
+		]]>
+	</delete>
+	<delete id="saSystemDAO.delEs">
+		<![CDATA[
+			DELETE FROM SWITCH_LIST 
+			WHERE NUM=#num#
+		]]>
+	</delete>
+	<delete id="saSystemDAO.delSntp">
+		<![CDATA[
+			DELETE FROM SNTP_LIST 
+			WHERE NUM=#num#
+		]]>
+	</delete>
+	<update id="saSystemDAO.exceptPackIed">
+		<![CDATA[
+			UPDATE IED_LIST
+			SET  USE_YN='N'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	<update id="saSystemDAO.exceptPackSa">
+		<![CDATA[
+			UPDATE SA_LIST
+			SET  USE_YN='N'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	<update id="saSystemDAO.exceptPackEs">
+		<![CDATA[
+			UPDATE SWITCH_LIST
+			SET  USE_YN='N'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	<update id="saSystemDAO.exceptPackSntp">
+		<![CDATA[
+			UPDATE SNTP_LIST
+			SET  USE_YN='N'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	
+	
+	<update id="saSystemDAO.addPackIed">
+		<![CDATA[
+			UPDATE IED_LIST
+			SET  USE_YN='Y'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	<update id="saSystemDAO.addPackSa">
+		<![CDATA[
+			UPDATE SA_LIST
+			SET  USE_YN='Y'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	<update id="saSystemDAO.addPackEs">
+		<![CDATA[
+			UPDATE SWITCH_LIST
+			SET  USE_YN='Y'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	<update id="saSystemDAO.addPackSntp">
+		<![CDATA[
+			UPDATE SNTP_LIST
+			SET  USE_YN='Y'
+				, FNL_DT = CURRENT_TIMESTAMP
+			WHERE NUM=#num#
+		]]>
+	</update>
+	<resultMap id="defaultMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="ntpServerIp" column="NTP_SERVER_IP"/>
+		<result property="ntpTime" column="NTP_TIME"/>
+		<result property="hdd" column="HDD"/>
+		<result property="reportMis" column="REPORT_MIS"/>
+		<result property="gooseMis" column="GOOSE_MIS"/>
+		<result property="reportScan" column="REPORT_SCAN"/>
+		<result property="reportTime" column="REPORT_TIME"/>
+		<result property="outsideNic" column="OUTSIDE_NIC"/>
+		<result property="sclFileName" column="OUTSIDE_SCL"/>
+		<result property="ietData" column="IET_DATA"/>
+		<result property="dataStart" column="DATA_START"/>
+		<result property="signalRow" column="SIGNAL_ROW"/>
+		<result property="title1" column="TITLE1"/>
+		<result property="title2" column="TITLE2"/>
+		<result property="regDt" column="REG_DT"/>
+		<result property="fnlDt" column="FNL_DT"/>
+		<result property="filePath" column="FILE_PATH"/>
+	</resultMap>
+	<select id="saSystemDAO.selectDefault" resultMap="defaultMap">
+            SELECT
+                NUM,NTP_SERVER_IP,NTP_TIME,HDD,REPORT_MIS,GOOSE_MIS,REPORT_SCAN,REPORT_TIME,OUTSIDE_NIC,
+                OUTSIDE_SCL,IET_DATA,DATA_START,SIGNAL_ROW,TITLE1,TITLE2,REG_DT,FNL_DT,FILE_PATH
+            FROM DEFAULT_SETTING
+            WHERE 1=1
+    </select>
+    <insert id="saSystemDAO.insertDefault">
+		<![CDATA[
+			INSERT INTO DEFAULT_SETTING 
+				( NTP_SERVER_IP,
+				NTP_TIME,
+				HDD,
+				REPORT_MIS,
+				GOOSE_MIS,
+				REPORT_SCAN,
+				REPORT_TIME,
+				OUTSIDE_NIC,
+				OUTSIDE_SCL,
+				IET_DATA,
+				DATA_START,
+				SIGNAL_ROW,
+				TITLE1,
+				TITLE2,
+				FILE_PATH
+				  )
+			VALUES ( #ntpServerIp#
+				  , #ntpTime#
+				  , #hdd#
+				  , #reportMis#
+				  , #gooseMis#
+				  , #reportScan#
+				  , #reportTime#
+				  , #outsideNic#
+				  , #sclFileName#
+				  , #ietData#
+				  , #dataStart#
+				  , #signalRow#
+				  , #title1#
+				  , #title2#
+				  , #filePath# )
+		]]>
+	</insert>
+    <update id="saSystemDAO.updateDefault">
+
+			UPDATE DEFAULT_SETTING
+			SET  NTP_SERVER_IP=#ntpServerIp#,
+				NTP_TIME=#ntpTime#,
+				HDD=#hdd#,
+				REPORT_MIS=#reportMis#,
+				GOOSE_MIS=#gooseMis#,
+				REPORT_SCAN=#reportScan#,
+				REPORT_TIME=#reportTime#,
+				OUTSIDE_NIC=#outsideNic#,
+				<isNotEmpty property="sclFileName">
+				<isNotNull property="sclFileName">
+				OUTSIDE_SCL=#sclFileName#,
+				</isNotNull>
+				</isNotEmpty>
+				IET_DATA=#ietData#,
+				DATA_START=#dataStart#,
+				SIGNAL_ROW=#signalRow#,
+				TITLE1=#title1#,
+				TITLE2=#title2#,
+				FNL_DT = CURRENT_TIMESTAMP,
+				FILE_PATH=#filePath#
+			WHERE 1=1
+
+	</update>
+	<insert id="saSystemDAO.insertLoginInfo">
+		<![CDATA[
+			INSERT INTO LOGIN_HISTORY 
+				( ID
+				  )
+			VALUES ( #id# )
+		]]>
+	</insert>
+	<update id="saSystemDAO.updateLoginInfo">
+
+			UPDATE LOGIN_HISTORY
+			SET  LOGOUT_TIME = CURRENT_TIMESTAMP
+			WHERE ID = #id# AND LOGOUT_TIME IS NULL
+
+	</update>
+	<resultMap id="errorSummListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="loginTime" column="LOGIN_TIME"/>
+		<result property="logoutTime" column="LOGOUT_TIME"/>
+		<result property="id" column="ID"/>
+	</resultMap>
+	<select id="saSystemDAO.selectErrorSummList" resultMap="errorSummListMap">
+            SELECT
+                NUM,LOGIN_TIME,LOGOUT_TIME,ID,"0" BACK_MAIN ,"0" BACK_BACKUP  ,"0" ACCESS ,"0" MMS ,"0" GOOSE 
+            FROM LOGIN_HISTORY
+            WHERE 1=1
+    </select>
+    <resultMap id="backMainErrorListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="eventDate" column="EVENT_DATE"/>
+		<result property="switchType" column="SWITCH_TYPE"/>
+		<result property="port" column="PORT"/>
+		<result property="connectEquip" column="CONNECT_EQUIP"/>
+		<result property="status" column="STATUS"/>
+	</resultMap>
+	<select id="saSystemDAO.selectBackMainErrorList" resultMap="backMainErrorListMap">
+            SELECT
+                NUM,EVENT_DATE,SWITCH_TYPE,PORT, CONNECT_EQUIP, STATUS
+            FROM SWITCH_STATUS
+            WHERE 1=1
+    </select>
+	<resultMap id="backBackupErrorListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="eventDate" column="EVENT_DATE"/>
+		<result property="switchType" column="SWITCH_TYPE"/>
+		<result property="port" column="PORT"/>
+		<result property="connectEquip" column="CONNECT_EQUIP"/>
+		<result property="status" column="STATUS"/>
+	</resultMap>
+	<select id="saSystemDAO.selectBackBackupErrorList" resultMap="backBackupErrorListMap">
+            SELECT
+                NUM,EVENT_DATE,SWITCH_TYPE,PORT, CONNECT_EQUIP, STATUS
+            FROM SWITCH_STATUS
+            WHERE 1=1
+    </select>
+	<resultMap id="accessErrorListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="eventDate" column="EVENT_DATE"/>
+		<result property="switchType" column="SWITCH_TYPE"/>
+		<result property="port" column="PORT"/>
+		<result property="connectEquip" column="CONNECT_EQUIP"/>
+		<result property="status" column="STATUS"/>
+	</resultMap>
+	<select id="saSystemDAO.selectAccessErrorList" resultMap="accessErrorListMap">
+            SELECT
+                NUM,EVENT_DATE,SWITCH_TYPE,PORT, CONNECT_EQUIP, STATUS
+            FROM SWITCH_STATUS
+            WHERE 1=1
+    </select>
+	<resultMap id="mmsErrorListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="eventDate" column="EVENT_DATE"/>
+		<result property="iedNum" column="IED_NUM"/>
+		<result property="iedConnStatus" column="IED_CONN_STATUS"/>
+		<result property="saStatus" column="SA_STATUS"/>
+		<result property="mainEquipStatus" column="MAIN_EQUIP_STATUS"/>
+		<result property="subEquipStatus" column="SUB_EQUIP_STATUS"/>
+		<result property="reportStatus" column="REPORT_STATUS"/>
+	</resultMap>
+	<select id="saSystemDAO.selectMmsErrorList" resultMap="mmsErrorListMap">
+            SELECT
+                NUM,EVENT_DATE,IED_NUM,IED_CONN_STATUS, SA_STATUS, MAIN_EQUIP_STATUS, SUB_EQUIP_STATUS, REPORT_STATUS
+            FROM MMS_STATUS
+            WHERE 1=1
+            <isNotEmpty property="startTime" prepend="and">
+				EVENT_DATE BETWEEN date_format(#startTime#,"%Y-%m-%d 00:00:01") and date_format(#endTime#, "%Y-%m-%d 23:59:59") 
+			</isNotEmpty>
+			<isNotEmpty property="searchKeyword" prepend="and">
+				IED_NUM LIKE '%' || #searchKeyword# || '%'
+			</isNotEmpty>
+			ORDER BY EVENT_DATE DESC
+    </select>
+	<resultMap id="gooseErrorListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="eventDate" column="EVENT_DATE"/>
+		<result property="address" column="ADDRESS"/>
+		<result property="gooseTime" column="GOOSE_TIME"/>
+		<result property="statusNum" column="STATUS_NUM"/>
+		<result property="iedNum" column="IED_NUM"/>
+		<result property="macAddress" column="MAC_ADDRESS"/>
+		<result property="faultCnt" column="FAULT_CNT"/>
+		<result property="status" column="STATUS"/>
+	</resultMap>
+	<select id="saSystemDAO.selectGooseErrorList" resultMap="gooseErrorListMap">
+            SELECT
+                NUM,EVENT_DATE,ADDRESS,GOOSE_TIME, STATUS_NUM, IED_NUM, MAC_ADDRESS, FAULT_CNT,STATUS
+            FROM GOOSE_STATUS
+            WHERE 1=1
+            <isNotEmpty property="startTime" prepend="and">
+				EVENT_DATE BETWEEN date_format(#startTime#,"%Y-%m-%d 00:00:01") and date_format(#endTime#, "%Y-%m-%d 23:59:59") 
+			</isNotEmpty>
+			<isNotEmpty property="searchKeyword" prepend="and">
+				IED_NUM LIKE '%' || #searchKeyword# || '%' 
+			</isNotEmpty>
+			ORDER BY EVENT_DATE DESC
+    </select>
+	
+	<resultMap id="errorDetailListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="eventDate" column="EVENT_DATE"/>
+		<result property="address" column="ADDRESS"/>
+		<result property="gooseTime" column="GOOSE_TIME"/>
+		<result property="statusNum" column="STATUS_NUM"/>
+		<result property="iedNum" column="IED_NUM"/>
+		<result property="macAddress" column="MAC_ADDRESS"/>
+		<result property="faultCnt" column="FAULT_CNT"/>
+		<result property="status" column="STATUS"/>
+	</resultMap>
+	<select id="saSystemDAO.selectErrorDetailList" resultMap="errorDetailListMap">
+            SELECT
+                NUM,EVENT_DATE,ADDRESS,GOOSE_TIME, STATUS_NUM, IED_NUM, MAC_ADDRESS, FAULT_CNT,STATUS
+            FROM GOOSE_STATUS
+            WHERE 1=1
+    </select>
+    <resultMap id="mmsMessageStatusListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="eventDate" column="EVENT_DATE"/>
+		<result property="iedNum" column="IED_NUM"/>
+		<result property="saName" column="SA_NAME"/>
+		<result property="service" column="SERVICE"/>
+		<result property="status" column="STATUS"/>
+	</resultMap>
+	<select id="saSystemDAO.selectMmsMessageStatusList" resultMap="mmsMessageStatusListMap">
+            SELECT
+                NUM,EVENT_DATE,IED_NUM,SA_NAME, SERVICE,STATUS
+            FROM MMS_MESSAGE_STATUS
+            WHERE 1=1
+            <isNotEmpty property="startTime" prepend="and">
+				EVENT_DATE BETWEEN date_format(#startTime#,"%Y-%m-%d 00:00:01") and date_format(#endTime#, "%Y-%m-%d 23:59:59") 
+			</isNotEmpty>
+			<isNotEmpty property="searchKeyword" prepend="and">
+				(SA_NAME LIKE '%' || #searchKeyword# || '%' or IED_NUM LIKE '%' || #searchKeyword# || '%')
+			</isNotEmpty>
+			ORDER BY EVENT_DATE DESC
+    </select>
+	<resultMap id="equipConnectListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="sntpNum" column="SNTP_NUM"/>
+		<result property="sntpPort" column="SNTP_PORT"/>
+		<result property="saNum" column="SA_NUM"/>
+		<result property="saPort" column="SA_PORT"/>
+		<result property="iedNum" column="IED_NUM"/>
+		<result property="switchNum" column="SWITCH_NUM"/>
+		<result property="ipAddress" column="IP_ADDRESS"/>
+		<result property="regDt" column="REG_DT"/>
+		<result property="iedName" column="IED_NAME"/>
+		<result property="saName" column="SA_NAME"/>
+		<result property="sntpName" column="SNTP_NAME"/>
+		<result property="switchName" column="SWITCH_NAME"/>
+	</resultMap>
+	<select id="saSystemDAO.selectEquipConnectList" resultMap="equipConnectListMap">
+            SELECT
+                A.NUM,A.SNTP_NUM,A.SNTP_PORT,A.SA_NUM,A.SA_PORT, A.IED_NUM,A.SWITCH_NUM,A.IP_ADDRESS,A.REG_DT
+                ,B.IED_NAME,C.SA_NAME,D.SNTP_NAME,E.SWITCH_NAME
+            FROM EQUIP_CONNECT_LIST A
+            LEFT OUTER JOIN IED_LIST B ON A.IED_NUM = B.NUM
+            LEFT OUTER JOIN SA_LIST C ON A.SA_NUM = C.NUM
+            LEFT OUTER JOIN SNTP_LIST D ON A.SNTP_NUM = D.NUM
+            LEFT OUTER JOIN SWITCH_LIST E ON A.SWITCH_NUM = E.NUM
+            WHERE 1=1
+            <!-- isNotEmpty property="startTime" prepend="and">
+				EVENT_DATE BETWEEN date_format(#startTime#,"%Y-%m-%d 00:00:01") and date_format(#endTime#, "%Y-%m-%d 23:59:59") 
+			</isNotEmpty>
+			<isNotEmpty property="searchKeyword" prepend="and">
+				(SA_NAME LIKE '%' || #searchKeyword# || '%' or IED_NUM LIKE '%' || #searchKeyword# || '%')
+			</isNotEmpty-->
+			ORDER BY REG_DT DESC
+    </select>
+    <insert id="saSystemDAO.insertUser">
+		<![CDATA[
+			INSERT INTO USER 
+				( ID
+				  , NAME
+				  , PW
+ )
+			VALUES ( #id#
+				  , #name#
+				  , #pw#
+ )
+		]]>
+	</insert>
+    <delete id="saSystemDAO.deleteUser">
+		<![CDATA[
+			DELETE FROM USER 
+			WHERE ID=#id#
+		]]>
+	</delete>
+    <!-- 로그인 여부확인 및 사용자 정보용-->
+    <select id="saSystemDAO.selectUser" resultMap="saSystem">
+        <![CDATA[
+            SELECT
+                ID, NAME, PW, AUTH, USE_YN, DEL_YN
+            FROM USER 
+            WHERE ID=#id# AND PW = #pw#
+        ]]>
+    </select>
+    <!-- 아이디 중복체크용 -->
+    <select id="saSystemDAO.selectUserChk" resultMap="saSystem">
+        <![CDATA[
+            SELECT
+                ID, NAME, PW, AUTH, USE_YN, DEL_YN
+            FROM USER 
+            WHERE ID=#id#
+        ]]>
+    </select>
+	<select id="saSystemDAO.selectUserList" parameterClass="searchVO" resultClass="egovMap">
+
+			SELECT
+				ID, NAME,PW,  AUTH, USE_YN, DEL_YN
+			FROM USER
+			WHERE 1=1
+			AND DEL_YN='N' AND USE_YN='Y'
+			<!-- isEqual prepend="AND" property="searchCondition" compareValue="0">
+				ID LIKE '%' || #searchKeyword# || '%'
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="1">
+				NAME LIKE '%' || #searchKeyword# || '%'
+			</isEqual-->
+			ORDER BY ID DESC
+			<!--  LIMIT #recordCountPerPage# OFFSET #firstIndex#-->		
+	</select>
+	<resultMap id="extrPacketListMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="num"/>
+		<result property="startDate" column="START_DATE"/>
+		<result property="endDate" column="END_DATE"/>
+		<result property="startTime" column="START_TIME"/>
+		<result property="endTime" column="END_TIME"/>
+		<result property="equipType" column="EQUIP_TYPE"/>
+		<result property="equipNum" column="EQUIP_NUM"/>
+		<result property="ipAddress" column="IP_ADDRESS"/>
+		<result property="status" column="STATUS"/>
+		<result property="fileName" column="FILE_NAME"/>
+		<result property="filePath" column="FILE_PATH"/>
+	</resultMap>
+	<select id="saSystemDAO.selectExtrPacketList"  resultMap="extrPacketListMap">
+
+			SELECT
+				NUM, START_DATE,END_DATE,START_TIME,END_TIME,  EQUIP_TYPE, EQUIP_NUM,IP_ADDRESS, STATUS, FILE_NAME, FILE_PATH
+			FROM PACKET_LIST 
+			WHERE 1=1
+			AND (SIGN(DATEDIFF(START_DATE, #startDate#)) = 0 OR SIGN(DATEDIFF(START_DATE, #startDate#)) = -1)
+			AND (SIGN(DATEDIFF(END_DATE, #endDate#)) = 0 OR SIGN(DATEDIFF(END_DATE, #endDate#)) = 1)
+			AND (SIGN(HOUR(START_TIME)-HOUR(#startTime#)) = 0 OR SIGN(HOUR(START_TIME)-HOUR(#startTime#)) = -1)
+			AND (SIGN(HOUR(END_TIME)-HOUR(#endTime#)) = 0 OR SIGN(HOUR(END_TIME)-HOUR(#endTime#)) = 1)
+			
+			AND (SIGN(MINUTE(START_TIME)-MINUTE(#startTime#)) = 0 OR SIGN(MINUTE(START_TIME)-MINUTE(#startTime#)) = -1)
+			AND (SIGN(MINUTE(END_TIME)-MINUTE(#endTime#)) = 0 OR SIGN(MINUTE(END_TIME)-MINUTE(#endTime#)) = 1)
+			<!-- AND	START_DATE  >=  to_date(#startDate#,'yyyy-mm-dd')
+
+			AND	END_DATE  =<  to_date(#endDate#,'yyyy-mm-dd')
+
+			AND	START_TIME  >=  #startTime#
+
+			AND	END_TIME  =<  #endTime#
+			-->
+			<isNotEmpty property="equipTypeArray" prepend="and">
+			EQUIP_TYPE IN ($equipTypeArray$)
+			<!-- iterate property="equipTypeArray" open="(" close=")" conjunction=",">
+         		$equipTypeArray$
+       		</iterate-->
+
+			</isNotEmpty>
+			<isNotEmpty property="equipTypeArray" prepend="and">
+				EQUIP_NUM IN ($numArray$)
+			<!-- iterate property="numArray" open="(" close=")" conjunction=",">
+         		$numArray$
+       		</iterate-->
+			</isNotEmpty>
+			<!--  isEqual prepend="AND" property="searchCondition" compareValue="0">
+				ID LIKE '%' || #searchKeyword# || '%'
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="1">
+				NAME LIKE '%' || #searchKeyword# || '%'
+			</isEqual-->
+			ORDER BY START_TIME DESC	
+
+	</select>
+	<update id="saSystemDAO.delFaultRecordDate">
+		<![CDATA[
+			UPDATE AUTO_DEL_DATE
+			SET  SAVE_MONTH=#saveMonth#
+			, HDD = #hdd#
+			WHERE TITLE1=#title1#
+		]]>
+	</update>
+	<resultMap id="delDateMap" class="taehee.saSystem.main.service.SaSystemVO">
+		<result property="num" column="NUM"/>
+		<result property="title1" column="TITLE1"/>
+		<result property="saveMonth" column="SAVE_MONTH"/>
+		<result property="hdd" column="HDD"/>
+	</resultMap>
+	<select id="saSystemDAO.selectDelDate" resultMap="delDateMap">
+        <![CDATA[
+            SELECT
+                NUM, TITLE1, SAVE_MONTH, HDD
+            FROM AUTO_DEL_DATE 
+            WHERE TITLE1=#title1#
+        ]]>
+    </select>
+	
+	
+	
+	
+	
+	
+	
+	
+    
+    
+    
+	
+	
+	
+	
+	
+	<update id="saSystemDAO.updateUser">
+		<![CDATA[
+			UPDATE USER
+			SET  PW=#pw#
+				, NAME=#name#
+				, AUTH=#auth#
+				, USE_YN=#useYn#
+				, DEL_YN=#delYn#
+			WHERE ID=#id#
+		]]>
+	</update>
+	
+	
+	
+	
+	
+	<select id="saSystemDAO.selectUserListTotCnt" parameterClass="searchVO" resultClass="int">
+
+			SELECT COUNT(*) totcnt
+			FROM USER
+			WHERE 1=1
+			AND DEL_YN='N' AND USE_YN='Y'
+			<isEqual prepend="AND" property="searchCondition" compareValue="0">
+				ID LIKE '%' || #searchKeyword# || '%'
+			</isEqual>
+			<isEqual prepend="AND" property="searchCondition" compareValue="1">
+				NAME LIKE '%' || #searchKeyword# || '%'
+			</isEqual>
+	</select>
+
+</sqlMap>
